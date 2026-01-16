@@ -29,6 +29,11 @@ const Home = () => {
 
 
 
+
+  
+
+
+  
   useEffect(() => {
     requestPermissionAndroid()
   }, []);
@@ -56,20 +61,6 @@ const Home = () => {
 
 
 
-
-//   useEffect(() => {
-//     const unsubscribe = messaging().onMessage(async remoteMessage => {
-//       Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
-//     });
-
-//     return unsubscribe;
-//   }, []);
-
-
-//   const getToken = async () => {
-//     const token = await messaging().getToken();
-//     console.log("Token----------", token)
-//   }
 
   const handleBackPress = useCallback(() => {
     if (canGoBack) {
@@ -159,7 +150,7 @@ const Home = () => {
   onLoadProgress={onLoadProgress}
   onNavigationStateChange={(navState) => setCanGoBack(navState.canGoBack)}
 
-  allowingReadAccessToURL={true}
+  // allowingReadAccessToURL={true}
   allowsInlineMediaPlayback={true}
   mediaPlaybackRequiresUserAction={false}
   originWhitelist={['*']}

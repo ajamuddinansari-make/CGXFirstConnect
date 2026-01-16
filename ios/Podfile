@@ -30,5 +30,15 @@ target 'CGXFirstConnect' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # --- Add C++17 Fix for Xcode 16 / Folly / react-native-pager-view ---
+    installer.pods_project.targets.each do |target|
+      if ['RCT-Folly', 'react-native-pager-view'].include? target.name
+        target.build_configurations.each do |config|
+          config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+          config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+        end
+      end
+    end
   end
 end
