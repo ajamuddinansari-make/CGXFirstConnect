@@ -5,6 +5,9 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
+# 🔥 ADD THIS LINE (for react-native-permissions)
+require_relative '../node_modules/react-native-permissions/scripts/setup'
+
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
@@ -17,9 +20,13 @@ end
 target 'CGXFirstConnect' do
   config = use_native_modules!
 
+  # 🔥 ADD THIS BLOCK (choose permissions you need)
+  setup_permissions([
+    'Notifications',
+  ])
+
   use_react_native!(
     :path => config[:reactNativePath],
-    # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
@@ -28,10 +35,9 @@ target 'CGXFirstConnect' do
       installer,
       config[:reactNativePath],
       :mac_catalyst_enabled => false,
-      # :ccache_enabled => true
     )
 
-    # --- Add C++17 Fix for Xcode 16 / Folly / react-native-pager-view ---
+    # --- C++17 Fix for Xcode 16 / Folly / react-native-pager-view ---
     installer.pods_project.targets.each do |target|
       if ['RCT-Folly', 'react-native-pager-view'].include? target.name
         target.build_configurations.each do |config|

@@ -27,7 +27,7 @@ console.log("cgx ..")
     //   />
     // </View>
     
-    <SafeAreaView>
+    <SafeAreaView style={{flex:1}}>
     <ImageBackground 
     source={require('../assets/images/Splash.png')}
     style={styles.container}
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#4CAF50'
+    // backgroundColor: '#4CAF50'
   },
   text: {
     fontSize: moderateScale(24),

@@ -39,7 +39,6 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 
-	
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -55,9 +54,13 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>We need permission to save images to your photo library.</string>
 
+
 	<key>NSCameraUsageDescription</key>
 	<string>Camera access is required to take a profile photo.</string>
 
+	
+	<key>NSUserNotificationUsageDescription</key>
+	<string>This app needs notification permission to send you updates and alerts.</string>
 
 	<key>RCTNewArchEnabled</key>
 	<true/>
