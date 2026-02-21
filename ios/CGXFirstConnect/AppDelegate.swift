@@ -55,7 +55,10 @@
 
 
 
-
+//
+//  AppDelegate.swift
+//  CGXFirstConnect
+//
 
 import UIKit
 import React
@@ -74,6 +77,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
 
+       
         let delegate = ReactNativeDelegate()
         let factory = RCTReactNativeFactory(delegate: delegate)
         delegate.dependencyProvider = RCTAppDependencyProvider()
@@ -83,31 +87,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         window = UIWindow(frame: UIScreen.main.bounds)
 
-        // Start React Native normally
+      
         factory.startReactNative(
             withModuleName: "CGXFirstConnect",
             in: window,
             launchOptions: launchOptions
         )
 
-        // 🔐 Apply screenshot protection AFTER RN loads
         DispatchQueue.main.async {
-            self.protectFromScreenshots()
+            self.enableSecureWindow()
         }
 
         return true
     }
 
-    // MARK: - Screenshot Protection
-    private func protectFromScreenshots() {
+    
+    private func enableSecureWindow() {
         guard let window = window else { return }
 
-        // Prevent duplicate secure layers
+        
         if window.viewWithTag(9999) != nil { return }
 
+    
         let secureField = UITextField(frame: window.bounds)
         secureField.tag = 9999
-        secureField.isSecureTextEntry = true
+        secureField.isSecureTextEntry = true    
         secureField.isUserInteractionEnabled = false
         secureField.backgroundColor = .clear
 
@@ -120,13 +124,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             secureField.topAnchor.constraint(equalTo: window.topAnchor),
             secureField.bottomAnchor.constraint(equalTo: window.bottomAnchor)
         ])
-
-        // ⭐ Key line that actually blocks screenshots
-        window.layer.superlayer?.addSublayer(secureField.layer)
     }
 }
 
-// MARK: - React Native Delegate
+
 class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
 
     override func sourceURL(for bridge: RCTBridge) -> URL? {

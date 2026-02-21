@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
+		782E7F7FE039F75C982301AC /* libPods-CGXFirstConnect.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F1132F5717AC2F0A66ABBD45 /* libPods-CGXFirstConnect.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		8CA37F76596C4953A8B3AFB2 /* libPods-CGXFirstConnect.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E213849D44F29F50E7092D27 /* libPods-CGXFirstConnect.a */; };
 		C925F9BE0B897F1AD7279BD3 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
@@ -19,13 +19,13 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = CGXFirstConnect/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = CGXFirstConnect/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = CGXFirstConnect/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		24687DAB9CC61AE4C64843D9 /* Pods-CGXFirstConnect.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CGXFirstConnect.release.xcconfig"; path = "Target Support Files/Pods-CGXFirstConnect/Pods-CGXFirstConnect.release.xcconfig"; sourceTree = "<group>"; };
+		294503E31795BEBF981823FB /* Pods-CGXFirstConnect.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CGXFirstConnect.debug.xcconfig"; path = "Target Support Files/Pods-CGXFirstConnect/Pods-CGXFirstConnect.debug.xcconfig"; sourceTree = "<group>"; };
+		33783BBAE0FE2ECE044527F1 /* Pods-CGXFirstConnect.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CGXFirstConnect.release.xcconfig"; path = "Target Support Files/Pods-CGXFirstConnect/Pods-CGXFirstConnect.release.xcconfig"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = CGXFirstConnect/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = CGXFirstConnect/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		9C3FB2B5A9C598785F1DAE8A /* Pods-CGXFirstConnect.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CGXFirstConnect.debug.xcconfig"; path = "Target Support Files/Pods-CGXFirstConnect/Pods-CGXFirstConnect.debug.xcconfig"; sourceTree = "<group>"; };
 		A16FD7062F18EE97003232DE /* libRNScreenshotPrevent.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libRNScreenshotPrevent.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		E213849D44F29F50E7092D27 /* libPods-CGXFirstConnect.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CGXFirstConnect.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F1132F5717AC2F0A66ABBD45 /* libPods-CGXFirstConnect.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CGXFirstConnect.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,7 +33,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8CA37F76596C4953A8B3AFB2 /* libPods-CGXFirstConnect.a in Frameworks */,
+				782E7F7FE039F75C982301AC /* libPods-CGXFirstConnect.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -57,7 +57,7 @@
 			children = (
 				A16FD7062F18EE97003232DE /* libRNScreenshotPrevent.a */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				E213849D44F29F50E7092D27 /* libPods-CGXFirstConnect.a */,
+				F1132F5717AC2F0A66ABBD45 /* libPods-CGXFirstConnect.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -94,8 +94,8 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				9C3FB2B5A9C598785F1DAE8A /* Pods-CGXFirstConnect.debug.xcconfig */,
-				24687DAB9CC61AE4C64843D9 /* Pods-CGXFirstConnect.release.xcconfig */,
+				294503E31795BEBF981823FB /* Pods-CGXFirstConnect.debug.xcconfig */,
+				33783BBAE0FE2ECE044527F1 /* Pods-CGXFirstConnect.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -107,13 +107,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "CGXFirstConnect" */;
 			buildPhases = (
-				E63033C4EB40E08382852336 /* [CP] Check Pods Manifest.lock */,
+				C9399D7D69F2A0E4B3FF3190 /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				48E36BE39D637D4216848E94 /* [CP] Embed Pods Frameworks */,
-				B512B6A829456FD0203082F9 /* [CP] Copy Pods Resources */,
+				692DD846906BC90E78FB7F44 /* [CP] Embed Pods Frameworks */,
+				3893FDA85183C3E9E39B0572 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -185,24 +185,7 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"\\\"$WITH_ENVIRONMENT\\\" \\\"$REACT_NATIVE_XCODE\\\"\"\n";
 		};
-		48E36BE39D637D4216848E94 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-CGXFirstConnect/Pods-CGXFirstConnect-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-CGXFirstConnect/Pods-CGXFirstConnect-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-CGXFirstConnect/Pods-CGXFirstConnect-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		B512B6A829456FD0203082F9 /* [CP] Copy Pods Resources */ = {
+		3893FDA85183C3E9E39B0572 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -219,7 +202,24 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-CGXFirstConnect/Pods-CGXFirstConnect-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		E63033C4EB40E08382852336 /* [CP] Check Pods Manifest.lock */ = {
+		692DD846906BC90E78FB7F44 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-CGXFirstConnect/Pods-CGXFirstConnect-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-CGXFirstConnect/Pods-CGXFirstConnect-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-CGXFirstConnect/Pods-CGXFirstConnect-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C9399D7D69F2A0E4B3FF3190 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -257,7 +257,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9C3FB2B5A9C598785F1DAE8A /* Pods-CGXFirstConnect.debug.xcconfig */;
+			baseConfigurationReference = 294503E31795BEBF981823FB /* Pods-CGXFirstConnect.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -287,7 +287,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 24687DAB9CC61AE4C64843D9 /* Pods-CGXFirstConnect.release.xcconfig */;
+			baseConfigurationReference = 33783BBAE0FE2ECE044527F1 /* Pods-CGXFirstConnect.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;

@@ -20,6 +20,7 @@
     "react-native-privacy-snapshot": "^1.0.0",
     "react-native-safe-area-context": "^5.6.2",
     "react-native-screens": "^4.19.0",
+    "react-native-screenshot-prevent": "^1.2.1",
     "react-native-webview": "^13.16.0"
   },
   "devDependencies": {

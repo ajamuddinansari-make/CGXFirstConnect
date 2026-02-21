@@ -7,91 +7,59 @@ import {
   Animated,
   Easing,
   Platform,
-  Alert
+  Alert,
+  AppState,
+  NativeModules,
+  NativeEventEmitter,
+  Linking,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  check,
-  request,
-  PERMISSIONS,
-  // RESULTS
-} from 'react-native-permissions';
-import { requestNotifications, RESULTS } from 'react-native-permissions';
+import PrivacySnapshot from 'react-native-privacy-snapshot';
 
+const { ScreenshotDetector } = NativeModules;
 
-// Uncomment if using Firebase token
-// import messaging from '@react-native-firebase/messaging';
+const INTERNAL_DOMAIN = 'firstconnectuser.cognigixdemo.com';
 
 const Home = () => {
   const webViewRef = useRef(null);
   const [canGoBack, setCanGoBack] = useState(false);
   const [backPressCount, setBackPressCount] = useState(0);
-  const progress = useRef(new Animated.Value(0)).current;
   const [isLoading, setIsLoading] = useState(false);
+  const [isProtected, setIsProtected] = useState(false);
+  const progress = useRef(new Animated.Value(0)).current;
 
-
-  // const requestPermission = useCallback(async () => {
-  //   try {
-  //     if (Platform.OS === 'android') {
-  //       const result = await request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS);
-  //       if (result === RESULTS.GRANTED) {
-  //         console.log('Notification Permission Granted (Android)');
-  //         getToken();
-  //       } else {
-  //         console.log('Notification Permission Denied (Android)');
-  //       }
-  //     } else if (Platform.OS === 'ios') {
-  //       const result = requestNotifications(['alert', 'sound', 'badge']);
-  //       if (result === RESULTS.GRANTED) {
-  //         console.log('Notification Permission Granted (iOS)');
-  //         getToken();
-  //       } else {
-  //         console.log('Notification Permission Denied (iOS)');
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.warn('Permission Error:', error);
-  //   }
-  // }, []);
-
-
-
-
-
-
-const requestPermission = useCallback(async () => {
-  try {
-    if (Platform.OS === 'android') {
-      const result = await request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS);
-      if (result === RESULTS.GRANTED) {
-        console.log('Notification Permission Granted (Android)');
-        getToken();
-      } else {
-        console.log('Notification Permission Denied (Android)');
-      }
-    } else if (Platform.OS === 'ios') {
-      const { status, settings } = await requestNotifications(['alert', 'sound', 'badge']);
-      console.log('iOS notification status:', status, settings);
-
-      if (status === RESULTS.GRANTED) {
-        console.log('Notification Permission Granted (iOS)');
-        getToken();
-      } else if (status === RESULTS.DENIED) {
-        console.log('Notification Permission Denied (iOS)');
-      } else if (status === RESULTS.BLOCKED) {
-        console.log('Notification Permission Blocked (iOS) — user must enable in settings');
-      }
-    }
-  } catch (error) {
-    console.warn('Permission Error:', error);
-  }
-}, []);
-
-
-
+ 
   useEffect(() => {
-    requestPermission();
+    if (Platform.OS !== 'ios') return;
+
+    if (PrivacySnapshot?.enabled) {
+      PrivacySnapshot.enabled(true);
+    }
+
+    if (ScreenshotDetector?.enableSecure) {
+      ScreenshotDetector.enableSecure();
+    }
+
+    const appStateListener = AppState.addEventListener('change', (state) => {
+      setIsProtected(state !== 'active');
+    });
+
+    let screenshotListener;
+    if (ScreenshotDetector) {
+      const eventEmitter = new NativeEventEmitter(ScreenshotDetector);
+      screenshotListener = eventEmitter.addListener('ScreenshotTaken', () => {
+        console.log('Screenshot detected!');
+        setIsProtected(true);
+        setTimeout(() => setIsProtected(false), 1500);
+      });
+    }
+
+    return () => {
+      appStateListener.remove();
+      screenshotListener?.remove();
+      PrivacySnapshot?.enabled(false);
+    };
   }, []);
 
  
@@ -104,11 +72,10 @@ const requestPermission = useCallback(async () => {
     if (backPressCount === 0) {
       setBackPressCount(1);
       if (Platform.OS === 'android') {
-        ToastAndroid.show("Press back again to exit", ToastAndroid.SHORT);
+        ToastAndroid.show('Press back again to exit', ToastAndroid.SHORT);
       } else {
-        Alert.alert("Press back again to exit");
+        Alert.alert('Press back again to exit');
       }
-
       setTimeout(() => setBackPressCount(0), 2000);
       return true;
     }
@@ -119,13 +86,13 @@ const requestPermission = useCallback(async () => {
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener(
-      "hardwareBackPress",
+      'hardwareBackPress',
       handleBackPress
     );
     return () => subscription.remove();
   }, [handleBackPress]);
 
-
+  
   const onLoadProgress = ({ nativeEvent }) => {
     const progressValue = nativeEvent.progress;
     setIsLoading(progressValue < 1);
@@ -138,7 +105,6 @@ const requestPermission = useCallback(async () => {
     }).start();
   };
 
- 
   const disableLongPressJS = `
     document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
     const style = document.createElement('style');
@@ -153,12 +119,40 @@ const requestPermission = useCallback(async () => {
     true;
   `;
 
+ 
+  const handleShouldStartLoad = (request) => {
+    const url = request.url;
+    console.log('onShouldStartLoadWithRequest →', url);
 
-  const getToken = () => {
-   
-    console.log("Token function called");
+    try {
+      const hostname = new URL(url).hostname;
+
+      
+      if (hostname === INTERNAL_DOMAIN) {
+        return true;
+      }
+
+      console.log('Opening external URL in browser →', url);
+
+      Linking.openURL(url).catch((err) =>
+        console.error('Failed to open external URL:', err)
+      );
+
+      return false; // Stop WebView
+    } catch (error) {
+      console.log('URL parse error:', error);
+      return true;
+    }
   };
 
+  const handleNavigationChange = (navState) => {
+    console.log('onNavigationStateChange →', navState.url);
+    setCanGoBack(navState.canGoBack);
+  };
+
+  const handleLoadStart = (event) => {
+    console.log('onLoadStart →', event.nativeEvent.url);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -179,19 +173,18 @@ const requestPermission = useCallback(async () => {
       <WebView
         ref={webViewRef}
         source={{ uri: 'https://firstconnectuser.cognigixdemo.com' }}
-        
-        // source={{ uri: 'https://reactnative.dev/docs/environment-setup' }}
-
         style={{ flex: 1 }}
         injectedJavaScript={disableLongPressJS}
-        javaScriptEnabled={true}
+        javaScriptEnabled
         onLoadProgress={onLoadProgress}
-        onNavigationStateChange={(navState) => setCanGoBack(navState.canGoBack)}
-        allowsInlineMediaPlayback={true}
-        mediaPlaybackRequiresUserAction={false}
-        originWhitelist={['*']}
-        startInLoadingState={true}
+        onLoadStart={handleLoadStart}
+        onNavigationStateChange={handleNavigationChange}
+        onShouldStartLoadWithRequest={handleShouldStartLoad}
       />
+
+      {Platform.OS === 'ios' && isProtected && (
+        <View style={styles.overlay} />
+      )}
     </SafeAreaView>
   );
 };
@@ -199,11 +192,20 @@ const requestPermission = useCallback(async () => {
 export default Home;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  progressBar: {
-    height: 3,
-    backgroundColor: '#2196F3',
+  container: { flex: 1, backgroundColor: 'white' },
+  progressBar: { height: 3, backgroundColor: '#2196F3' },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'white',
+    zIndex: 999,
   },
 });
+
+
+
+
+
+
+
+
+

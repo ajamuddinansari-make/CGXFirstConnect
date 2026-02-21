@@ -19,13 +19,7 @@ console.log("cgx ..")
 
 
   return (
-    // <View style={styles.container}>
-    //   <Text style={styles.text}>FirstConnect</Text>
-    //   <Image
-    //   source={require("../assets/images/Splash.png")}
-    //   resizeMethod='cover'
-    //   />
-    // </View>
+  
     
     <SafeAreaView style={{flex:1}}>
     <ImageBackground 

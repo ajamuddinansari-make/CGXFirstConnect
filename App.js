@@ -52,31 +52,30 @@
 
 
 
-
-
-
-
-import { View, Text } from 'react-native'
-import React from 'react'
-import { NavigationContainer } from '@react-navigation/native'
-import MainNavigator from './src/navigation/MainNavigator'
+import React, { useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import MainNavigator from './src/navigation/MainNavigator';
+import RNScreenshotPrevent from 'react-native-screenshot-prevent';
 
 const App = () => {
 
+  useEffect(() => {
+    // Enable screenshot prevention
+    RNScreenshotPrevent.enableSecureView();
 
-  console.log("React Test-----")
+    return () => {
+      RNScreenshotPrevent.disableSecureView();
+    };
+  }, []);
+
   return (
-    // <View>
-    //   <Text>Appzzzzz</Text>
-    // </View> 
     <NavigationContainer>
       <MainNavigator />
     </NavigationContainer>
+  );
+};
 
-  )
-}
-
-export default App
+export default App;
 
 // com.firstconnect.cgx
 
