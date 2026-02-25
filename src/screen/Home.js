@@ -19,7 +19,21 @@ import PrivacySnapshot from 'react-native-privacy-snapshot';
 
 const { ScreenshotDetector } = NativeModules;
 
-const INTERNAL_DOMAIN = 'firstconnectuser.cognigixdemo.com';
+
+const INTERNAL_DOMAINS = [
+  'firstconnectuser.cognigixdemo.com',
+  'mozilla.github.io',                  
+  'officeapps.live.com',                
+  'login.microsoftonline.com',          
+  'login.live.com',                     
+  'oauth.officeapps.live.com',          
+  'amazonaws.com',                      
+];
+
+
+const EXTERNAL_DOMAINS = [
+  'firstconnectadmin.cognigix.com',
+];
 
 const Home = () => {
   const webViewRef = useRef(null);
@@ -29,17 +43,12 @@ const Home = () => {
   const [isProtected, setIsProtected] = useState(false);
   const progress = useRef(new Animated.Value(0)).current;
 
- 
+
   useEffect(() => {
     if (Platform.OS !== 'ios') return;
 
-    if (PrivacySnapshot?.enabled) {
-      PrivacySnapshot.enabled(true);
-    }
-
-    if (ScreenshotDetector?.enableSecure) {
-      ScreenshotDetector.enableSecure();
-    }
+    PrivacySnapshot?.enabled?.(true);
+    ScreenshotDetector?.enableSecure?.();
 
     const appStateListener = AppState.addEventListener('change', (state) => {
       setIsProtected(state !== 'active');
@@ -49,7 +58,6 @@ const Home = () => {
     if (ScreenshotDetector) {
       const eventEmitter = new NativeEventEmitter(ScreenshotDetector);
       screenshotListener = eventEmitter.addListener('ScreenshotTaken', () => {
-        console.log('Screenshot detected!');
         setIsProtected(true);
         setTimeout(() => setIsProtected(false), 1500);
       });
@@ -58,28 +66,24 @@ const Home = () => {
     return () => {
       appStateListener.remove();
       screenshotListener?.remove();
-      PrivacySnapshot?.enabled(false);
+      PrivacySnapshot?.enabled?.(false);
     };
   }, []);
 
- 
+
   const handleBackPress = useCallback(() => {
     if (canGoBack) {
       webViewRef.current.goBack();
       return true;
     }
-
     if (backPressCount === 0) {
       setBackPressCount(1);
-      if (Platform.OS === 'android') {
-        ToastAndroid.show('Press back again to exit', ToastAndroid.SHORT);
-      } else {
-        Alert.alert('Press back again to exit');
-      }
+      Platform.OS === 'android'
+        ? ToastAndroid.show('Press back again to exit', ToastAndroid.SHORT)
+        : Alert.alert('Press back again to exit');
       setTimeout(() => setBackPressCount(0), 2000);
       return true;
     }
-
     BackHandler.exitApp();
     return true;
   }, [canGoBack, backPressCount]);
@@ -92,11 +96,10 @@ const Home = () => {
     return () => subscription.remove();
   }, [handleBackPress]);
 
-  
+
   const onLoadProgress = ({ nativeEvent }) => {
     const progressValue = nativeEvent.progress;
     setIsLoading(progressValue < 1);
-
     Animated.timing(progress, {
       toValue: progressValue,
       duration: 100,
@@ -105,53 +108,57 @@ const Home = () => {
     }).start();
   };
 
-  const disableLongPressJS = `
-    document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-    const style = document.createElement('style');
-    style.innerHTML = \`
-      * {
-        -webkit-user-select: none !important;
-        -webkit-touch-callout: none !important;
-        user-select: none !important;
-      }
-    \`;
-    document.head.appendChild(style);
-    true;
-  `;
-
- 
+  
   const handleShouldStartLoad = (request) => {
     const url = request.url;
-    console.log('onShouldStartLoadWithRequest →', url);
+    console.log('[onShouldStartLoadWithRequest] →', url);
 
     try {
-      const hostname = new URL(url).hostname;
+      if (!url || url === 'about:blank') return true;
 
-      
-      if (hostname === INTERNAL_DOMAIN) {
+  
+      if (url.startsWith('tel:') || url.startsWith('mailto:') || url.startsWith('whatsapp:') || url.startsWith('intent:')) {
+        Linking.openURL(url);
+        return false;
+      }
+
+      const { hostname } = new URL(url);
+
+  
+      if (EXTERNAL_DOMAINS.some(domain => hostname.includes(domain))) {
+        Linking.openURL(url);
+        return false;
+      }
+
+  
+      const isInternal = INTERNAL_DOMAINS.some(domain => hostname.includes(domain));
+      if (isInternal) {
+        console.log('Allowed internal URL inside WebView →', url);
         return true;
       }
 
-      console.log('Opening external URL in browser →', url);
+  
+      console.log('Opening external URL outside app →', url);
+      Linking.openURL(url);
+      return false;
 
-      Linking.openURL(url).catch((err) =>
-        console.error('Failed to open external URL:', err)
-      );
-
-      return false; // Stop WebView
     } catch (error) {
-      console.log('URL parse error:', error);
+      console.log('URL parse error →', url, error);
       return true;
     }
   };
 
   const handleNavigationChange = (navState) => {
-    console.log('onNavigationStateChange →', navState.url);
+    console.log('[onNavigationStateChange] →', navState.url);
     setCanGoBack(navState.canGoBack);
   };
 
-  const handleLoadStart = (event) => {
-    console.log('onLoadStart →', event.nativeEvent.url);
+  const handleLoadStart = ({ nativeEvent }) => {
+    console.log('[onLoadStart] →', nativeEvent.url);
+  };
+
+  const handleLoadEnd = ({ nativeEvent }) => {
+    console.log('[onLoadEnd] →', nativeEvent.url);
   };
 
   return (
@@ -174,12 +181,14 @@ const Home = () => {
         ref={webViewRef}
         source={{ uri: 'https://firstconnectuser.cognigixdemo.com' }}
         style={{ flex: 1 }}
-        injectedJavaScript={disableLongPressJS}
         javaScriptEnabled
+        originWhitelist={['*']}
         onLoadProgress={onLoadProgress}
         onLoadStart={handleLoadStart}
+        onLoadEnd={handleLoadEnd}
         onNavigationStateChange={handleNavigationChange}
         onShouldStartLoadWithRequest={handleShouldStartLoad}
+        allowsBackForwardNavigationGestures
       />
 
       {Platform.OS === 'ios' && isProtected && (
@@ -200,12 +209,3 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
 });
-
-
-
-
-
-
-
-
-
