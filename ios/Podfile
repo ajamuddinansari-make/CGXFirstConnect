@@ -19,7 +19,8 @@ end
 
 target 'CGXFirstConnect' do
   config = use_native_modules!
-
+  use_frameworks! :linkage => :static
+  $RNFirebaseAsStaticFramework = true
   # 🔥 ADD THIS BLOCK (choose permissions you need)
   setup_permissions([
     'Notifications',
