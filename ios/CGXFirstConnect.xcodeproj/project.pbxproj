@@ -284,7 +284,7 @@
 				CODE_SIGN_ENTITLEMENTS = CGXFirstConnect/CGXFirstConnect.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = CK4C4QF2NB;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = CGXFirstConnect/Info.plist;
@@ -318,7 +318,7 @@
 				CODE_SIGN_ENTITLEMENTS = CGXFirstConnect/CGXFirstConnect.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = CK4C4QF2NB;
 				INFOPLIST_FILE = CGXFirstConnect/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "CGX FirstConnect";
