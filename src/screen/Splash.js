@@ -7,50 +7,56 @@ import DeviceInfo from 'react-native-device-info';
 
 const Splash = ({ navigation }) => {
 
-   const IOS_APP_ID = '6756782373'; 
+  const IOS_APP_ID = '6756782373';
 
   useEffect(() => {
-    // checkAppVersion();
-    navigateToHome();
+    checkAppVersion();
+    // navigateToHome();
   }, []);
+
+
+
+
 
   const checkAppVersion = async () => {
     try {
+
       const latestVersion = await VersionCheck.getLatestVersion();
       const currentVersion = DeviceInfo.getVersion();
-      
+
       // const currentVersion = 1.4
 
-      console.log("latestVersion",latestVersion)
-      console.log("currentVersion",currentVersion)
+      console.log("latestVersion", latestVersion)
+      console.log("currentVersion", currentVersion)
 
-      if (latestVersion !== currentVersion) {
+      const res = await VersionCheck.needUpdate({
+        provider: 'appStore',
+      });
+
+      console.log("res", res);
+
+      if (res?.isNeeded) {
         Alert.alert(
-          "Update Available",
-          "A new version of the app is available. Please update to continue.",
+          'Update Available',
+          'A new version of the app is available.',
           [
             {
-              text: "Update",
-                onPress: async () => {
-                try {
-                  const storeUrl =
-                    Platform.OS === 'ios'
-                      ? `https://apps.apple.com/app/id${IOS_APP_ID}`
-                      : 'market://details?id=com.firstconnect'; 
-
-                  await Linking.openURL(storeUrl);
-                } catch (err) {
-                  console.log("Error opening store:", err);
-                }
-              }
-            }
+              text: 'Later',
+              onPress: () => navigateToHome(),
+              style: 'cancel',
+            },
+            {
+              text: 'Update',
+              onPress: () =>
+                Linking.openURL(`https://apps.apple.com/app/id${IOS_APP_ID}`),
+            },
           ],
-          { cancelable: false }
         );
       } else {
         navigateToHome();
       }
-    } catch (error) {
+    } catch (e) {
+      console.log(e);
       navigateToHome();
     }
   };

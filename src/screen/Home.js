@@ -45,6 +45,8 @@ const Home = () => {
 
   const progress = useRef(new Animated.Value(0)).current;
 
+  const hasRefreshed = useRef(false)
+
   console.log("FCM Token", fcmToken)
 
   useEffect(() => {
@@ -235,6 +237,22 @@ useEffect(() => {
   const handleNavigationChange = navState => {
     setCanGoBack(navState.canGoBack);
     console.log('Navigated to URL:', navState.url);
+
+    if(navState.url.includes('/pre-login') && !hasRefreshed.current){
+      hasRefreshed.current = true;
+
+      console.log("One-time refresh triggered");
+      setUserId(null)
+      setIsTokenSent(false)
+
+      webViewRef.current?.reload();
+
+      setTimeout(() =>{
+        hasRefreshed.current = false;
+      }, 3000)
+      
+    }
+
 
     if (navState.url.includes('/user/home')) {
       setTimeout(() => {
