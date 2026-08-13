@@ -68,37 +68,54 @@ import { AppRegistry } from 'react-native';
 import App from './App';
 import { name as appName } from './app.json';
 import messaging from '@react-native-firebase/messaging';
-import notifee from '@notifee/react-native';
+
+import notifee, { EventType } from '@notifee/react-native';
 
 // Function to display notification
 async function displayNotification(remoteMessage) {
   if (!remoteMessage) return;
 
-  let title = 'Notification';
-  let body = '';
+  const title =
+    remoteMessage.notification?.title || "Notification";
 
-  try {
-    if (remoteMessage.data?.content) {
-      const content = JSON.parse(remoteMessage.data.content);
-      title = content?.TITLE?.EN || title;
-      body = content?.SUBTITLE?.EN || body;
-    }
-  } catch (e) {
-    console.log('Error parsing notification data', e);
-  }
+  const body =
+    remoteMessage.notification?.body || "";
+
+  console.log("FCM DATA:", remoteMessage.data);
 
   await notifee.displayNotification({
-    title: title,
-    body: body,
-    ios: {
-      sound: 'default',
+    title,
+    body,
+
+    data: {
+      contentLink: remoteMessage.data?.contentLink,
+      contentUdid: remoteMessage.data?.contentUdid,
+      moduleType: remoteMessage.data?.moduleType,
     },
+
     android: {
-      channelId: 'default',
-      smallIcon: 'ic_launcher',
+      channelId: "default",
+      smallIcon: "ic_launcher",
+
+      pressAction: {
+        id: "default",
+      },
+    },
+
+    ios: {
+      sound: "default",
     },
   });
 }
+
+notifee.onBackgroundEvent(async ({ type, detail }) => {
+  if (type === EventType.PRESS) {
+    console.log(
+      "Pressed:",
+      detail.notification?.data
+    );
+  }
+});
 
 // Background / killed state handler
 messaging().setBackgroundMessageHandler(async remoteMessage => {

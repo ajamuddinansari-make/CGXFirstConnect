@@ -16,7 +16,8 @@ import { WebView } from 'react-native-webview';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PrivacySnapshot from 'react-native-privacy-snapshot';
 import messaging, { AuthorizationStatus } from '@react-native-firebase/messaging';
-import notifee, { IOSAuthorizationStatus } from '@notifee/react-native';
+// import notifee, { IOSAuthorizationStatus } from '@notifee/react-native';
+import notifee, { EventType } from '@notifee/react-native';
 
 const { ScreenshotDetector } = NativeModules;
 
@@ -35,7 +36,7 @@ const Home = () => {
   const webViewRef = useRef(null);
 
   const [canGoBack, setCanGoBack] = useState(false);
-  const [backPressCount, setBackPressCount] = useState(0);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [isProtected, setIsProtected] = useState(false);
 
@@ -46,6 +47,8 @@ const Home = () => {
   const progress = useRef(new Animated.Value(0)).current;
 
   const hasRefreshed = useRef(false)
+  const [pendingUrl, setPendingUrl] = useState(null);
+  const webViewLoaded = useRef(false);
 
   console.log("FCM Token", fcmToken)
 
@@ -58,7 +61,7 @@ const Home = () => {
     const appStateListener = AppState.addEventListener('change', state => {
       setIsProtected(state !== 'active');
     });
-
+ 
     let screenshotListener;
 
     if (ScreenshotDetector?.addListener) {
@@ -78,62 +81,123 @@ const Home = () => {
     };
   }, []);
 
- 
-useEffect(() => {
-  const initFCM = async () => {
-    try {
-    
-      await notifee.requestPermission();
 
-    
-      const authStatus = await messaging().requestPermission();
-      const enabled =
-        authStatus === AuthorizationStatus.AUTHORIZED ||
-        authStatus === AuthorizationStatus.PROVISIONAL;
+  useEffect(() => {
+    const initFCM = async () => {
+      try {
 
-      if (!enabled) {
-        console.log('Notification permission denied');
-        return;
-      }
+        await notifee.requestPermission();
 
-      await messaging().registerDeviceForRemoteMessages();
 
-      const token = await messaging().getToken();
-      setFcmToken(token);
+        const authStatus = await messaging().requestPermission();
+        const enabled =
+          authStatus === AuthorizationStatus.AUTHORIZED ||
+          authStatus === AuthorizationStatus.PROVISIONAL;
 
-     
-      const unsubscribeOnMessage = messaging().onMessage(
-        async remoteMessage => {
-          console.log('Foreground message:', remoteMessage);
-
-          await notifee.displayNotification({
-            title: remoteMessage?.notification?.title || 'Notification',
-            body: remoteMessage?.notification?.body || '',
-            ios: {
-              sound: 'default',
-            },
-          });
+        if (!enabled) {
+          console.log('Notification permission denied');
+          return;
         }
-      );
 
-      const unsubscribeTokenRefresh = messaging().onTokenRefresh(newToken => {
-        setFcmToken(newToken);
-        setIsTokenSent(false);
+        await messaging().registerDeviceForRemoteMessages();
+
+        const token = await messaging().getToken();
+        setFcmToken(token);
+
+
+        const unsubscribeOnMessage = messaging().onMessage(
+          async remoteMessage => {
+            console.log('================ FCM MESSAGE ================');
+            console.log(JSON.stringify(remoteMessage, null, 2));
+
+            
+
+            console.log('Data:', remoteMessage?.data);
+            console.log(
+              'Content Link:',
+              remoteMessage?.data?.contentLink
+            );
+
+            console.log('Apple:', remoteMessage?.apns);
+            console.log('Android:', remoteMessage?.android);
+
+            await notifee.displayNotification({
+              title: remoteMessage?.notification?.title || 'Notification',
+              body: remoteMessage?.notification?.body || '',
+              data: {
+                contentLink: remoteMessage?.data?.contentLink,
+              },
+              ios: {
+                sound: 'default',
+              },
+            });
+
+            console.log('=============================================');
+          }
+        );
+
+        const unsubscribeTokenRefresh = messaging().onTokenRefresh(newToken => {
+          setFcmToken(newToken);
+          setIsTokenSent(false);
+        });
+
+        return () => {
+          unsubscribeOnMessage();
+          unsubscribeTokenRefresh();
+        };
+      } catch (error) {
+        console.log('FCM Setup Error:', error);
+      }
+    };
+
+    initFCM();
+  }, []);
+
+
+  useEffect(() => {
+    // App opened from a killed state
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        console.log('Initial Notification:', remoteMessage);
+
+        const contentLink = remoteMessage?.data?.contentLink;
+
+        if (contentLink) {
+          setPendingUrl(
+            `https://firstconnectuser.cognigix.com${contentLink}`
+          );
+        }
       });
 
-      return () => {
-        unsubscribeOnMessage();
-        unsubscribeTokenRefresh();
-      };
-    } catch (error) {
-      console.log('FCM Setup Error:', error);
+ 
+  }, []);
+
+  useEffect(() => {
+  const unsubscribe = messaging().onNotificationOpenedApp(remoteMessage => {
+    console.log(
+      'Opened from background:',
+      JSON.stringify(remoteMessage, null, 2)
+    );
+
+    const contentLink = remoteMessage?.data?.contentLink;
+
+    if (contentLink) {
+      const url = `https://firstconnectuser.cognigix.com${contentLink}`;
+
+      if (webViewLoaded.current && webViewRef.current) {
+        webViewRef.current.injectJavaScript(`
+          window.location.href = "${url}";
+          true;
+        `);
+      } else {
+        setPendingUrl(url);
+      }
     }
-  };
+  });
 
-  initFCM();
+  return unsubscribe;
 }, []);
-
-
 
   const sendFcmTokenToBackend = async (userId, token) => {
     try {
@@ -147,8 +211,8 @@ useEffect(() => {
           }),
         }
       );
-      const data = await response.json() 
-      console.log("data....",data)
+      const data = await response.json()
+      console.log("data....", data)
       if (!response.ok) throw new Error(`Server error: ${response.status}`);
       setIsTokenSent(true);
     } catch (error) {
@@ -162,33 +226,32 @@ useEffect(() => {
     }
   }, [userId, fcmToken, isTokenSent]);
 
-  const handleBackPress = useCallback(() => {
-    if (canGoBack) {
-      webViewRef.current.goBack();
-      return true;
-    }
-
-    if (backPressCount === 0) {
-      setBackPressCount(1);
-      Platform.OS === 'android'
-        ? ToastAndroid.show('Press back again to exit', ToastAndroid.SHORT)
-        : Alert.alert('Press back again to exit');
-
-      setTimeout(() => setBackPressCount(0), 2000);
-      return true;
-    }
-
-    BackHandler.exitApp();
-    return true;
-  }, [canGoBack, backPressCount]);
 
   useEffect(() => {
-    const subscription = BackHandler.addEventListener(
-      'hardwareBackPress',
-      handleBackPress
-    );
-    return () => subscription.remove();
-  }, [handleBackPress]);
+    const unsubscribe = notifee.onForegroundEvent(({ type, detail }) => {
+      if (type === EventType.PRESS) {
+        console.log('Notification Pressed');
+
+        const contentLink = detail.notification?.data?.contentLink;
+
+        console.log('Content Link:', contentLink);
+
+        if (contentLink && webViewRef.current) {
+          const url = `https://firstconnectuser.cognigix.com${contentLink}`;
+
+          console.log('Opening URL:', url);
+
+          webViewRef.current.injectJavaScript(`
+          window.location.href = "${url}";
+          true;
+        `);
+        }
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
 
   const onLoadProgress = ({ nativeEvent }) => {
     const progressValue = nativeEvent.progress;
@@ -221,7 +284,7 @@ useEffect(() => {
     try {
       const { hostname } = new URL(url);
 
-    
+
       const isInternal = INTERNAL_DOMAINS.some(domain => hostname.includes(domain));
       if (!isInternal) {
         Linking.openURL(url);
@@ -238,7 +301,7 @@ useEffect(() => {
     setCanGoBack(navState.canGoBack);
     console.log('Navigated to URL:', navState.url);
 
-    if(navState.url.includes('/pre-login') && !hasRefreshed.current){
+    if (navState.url.includes('/pre-login') && !hasRefreshed.current) {
       hasRefreshed.current = true;
 
       console.log("One-time refresh triggered");
@@ -247,10 +310,10 @@ useEffect(() => {
 
       webViewRef.current?.reload();
 
-      setTimeout(() =>{
+      setTimeout(() => {
         hasRefreshed.current = false;
       }, 3000)
-      
+
     }
 
 
@@ -297,6 +360,18 @@ useEffect(() => {
 
         source={{ uri: 'https://firstconnectuser.cognigix.com' }}
         style={{ flex: 1 }}
+        onLoadEnd={() => {
+          webViewLoaded.current = true;
+
+          if (pendingUrl) {
+            webViewRef.current?.injectJavaScript(`
+        window.location.href = "${pendingUrl}";
+        true;
+      `);
+
+            setPendingUrl(null);
+          }
+        }}
         javaScriptEnabled
         domStorageEnabled
         originWhitelist={['*']}
