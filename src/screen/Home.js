@@ -7,16 +7,15 @@ import {
   Animated,
   Easing,
   Platform,
-  Alert,
   AppState,
   NativeModules,
   Linking,
+  
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PrivacySnapshot from 'react-native-privacy-snapshot';
 import messaging, { AuthorizationStatus } from '@react-native-firebase/messaging';
-// import notifee, { IOSAuthorizationStatus } from '@notifee/react-native';
 import notifee, { EventType } from '@notifee/react-native';
 
 const { ScreenshotDetector } = NativeModules;
@@ -49,6 +48,8 @@ const Home = () => {
   const hasRefreshed = useRef(false)
   const [pendingUrl, setPendingUrl] = useState(null);
   const webViewLoaded = useRef(false);
+
+  const appState = useRef(AppState.currentState)
 
   console.log("FCM Token", fcmToken)
 
@@ -107,19 +108,10 @@ const Home = () => {
 
         const unsubscribeOnMessage = messaging().onMessage(
           async remoteMessage => {
-            console.log('================ FCM MESSAGE ================');
-            console.log(JSON.stringify(remoteMessage, null, 2));
-
-            
-
+          
             console.log('Data:', remoteMessage?.data);
-            console.log(
-              'Content Link:',
-              remoteMessage?.data?.contentLink
-            );
-
-            console.log('Apple:', remoteMessage?.apns);
-            console.log('Android:', remoteMessage?.android);
+         
+           
 
             await notifee.displayNotification({
               title: remoteMessage?.notification?.title || 'Notification',
@@ -132,7 +124,7 @@ const Home = () => {
               },
             });
 
-            console.log('=============================================');
+            
           }
         );
 
@@ -152,6 +144,35 @@ const Home = () => {
 
     initFCM();
   }, []);
+
+
+useEffect(() => {
+  const subscription = AppState.addEventListener(
+    'change',
+    nextState => {
+      const previousState = appState.current;
+
+      const wasBackground =
+        previousState === 'background' ||
+        previousState === 'inactive';
+
+      if (wasBackground && nextState === 'active') {
+    
+        setTimeout(() => {
+          if (webViewRef.current) {
+            webViewRef.current.reload();
+          }
+        }, 300);
+      }
+
+      appState.current = nextState;
+    }
+  );
+
+  return () => {
+    subscription.remove();
+  };
+}, []);
 
 
   useEffect(() => {
@@ -230,16 +251,16 @@ const Home = () => {
   useEffect(() => {
     const unsubscribe = notifee.onForegroundEvent(({ type, detail }) => {
       if (type === EventType.PRESS) {
-        console.log('Notification Pressed');
+       
 
         const contentLink = detail.notification?.data?.contentLink;
 
-        console.log('Content Link:', contentLink);
+       
 
         if (contentLink && webViewRef.current) {
           const url = `https://firstconnectuser.cognigix.com${contentLink}`;
 
-          console.log('Opening URL:', url);
+         
 
           webViewRef.current.injectJavaScript(`
           window.location.href = "${url}";
@@ -267,7 +288,7 @@ const Home = () => {
 
   const handleShouldStartLoad = request => {
     const url = request.url;
-    console.log('Trying to load URL:', url);
+    
 
     if (!url || url === 'about:blank') return true;
 
@@ -298,7 +319,7 @@ const Home = () => {
   };
 
   const handleNavigationChange = navState => {
-    setCanGoBack(navState.canGoBack);
+    // setCanGoBack(navState.canGoBack);
     console.log('Navigated to URL:', navState.url);
 
     if (navState.url.includes('/pre-login') && !hasRefreshed.current) {
@@ -360,6 +381,13 @@ const Home = () => {
 
         source={{ uri: 'https://firstconnectuser.cognigix.com' }}
         style={{ flex: 1 }}
+
+       cacheEnabled={true}
+
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+
+        originWhitelist={['*']}
         onLoadEnd={() => {
           webViewLoaded.current = true;
 
@@ -368,13 +396,10 @@ const Home = () => {
         window.location.href = "${pendingUrl}";
         true;
       `);
-
             setPendingUrl(null);
           }
         }}
-        javaScriptEnabled
-        domStorageEnabled
-        originWhitelist={['*']}
+        
         onLoadProgress={onLoadProgress}
         onNavigationStateChange={handleNavigationChange}
         onShouldStartLoadWithRequest={handleShouldStartLoad}
